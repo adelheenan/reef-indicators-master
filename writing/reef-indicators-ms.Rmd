@@ -1,0 +1,99 @@
+---
+title: "System indicators for coral reef fisheries"
+author: "James Robinson"
+date: "30 June 2016"
+output: html_document
+---
+
+### Introduction
+
+#### Reef fisheries are important, but difficult to monitor health
+
+Coral reef fisheries provide sustenance and employment for millions of people globally, yet threats from overfishing, habitat degradation, and climate change pose challenges for effective monitoring and management of ecosystem health. Reef fish biomass is widely used as a coarse proxy for fishery health at local, regional, and global scales (REF), while complimentary size- and trait-based indicators are used inconsistently and in different ways. Global fisheries research has advocated that indicator sets be used to provide a comprehensive assessment of ecosystem health. Although XX community-level indicators have been quantified for reef fisheries, advice on indicators for reef fisheries is limited.
+
+#### General reef concepts - total vs. herbivorous biomass; diversity; size
+
+Overfishing of reef ecosystems is pervasive across the tropics....
+
+#### Temperate fisheries indicators
+
+Indicator sets for assessing temperate fisheries health have been widely advocated on the basis that....... (REF, REF). 
+
+* Redundancy between metrics (Greenstreet et al. 2008)
+
+* Data intensive - indicator set is large. 
+
+* Stock assessments and ecosystem models provide tangible management targets. Indicators may be less relevant for these systems.
+
+#### Goals of indicators
+
+* Relate to fishing properties (biomass + size)
+
+* Easily quantified
+
+* Life-history based parameters often require intensive data....... 
+
+* Low redundancy between metrics
+
+#### Final paragraph
+
+The multi-gear, multi-species nature of coral reef fisheries often confounds assessments of exploitation impacts and system health across regions and national jurisdictions. Although fishable biomass estimates have provided coarse indicators of ecosystem degradation, it is unclear how other community-level properties vary across fishing gradients and across different regions. Although a suite of ecological indicators have been employed in the coral reef literature (Nash & Graham 2016), relationships between these indicators have not been quantified and as such the utility of different community-level metrics for detecting fishing impacts remains ambiguous. We estimate XX reef indicators to assess relationships between indicators and determine a candidate indicator set which explains the most biological variability with the fewest number of metrics. We also assess the robustness of these top indicators to environmental variability, and make recommendations for future assessments of reef fisheries.
+
+
+
+
+### Methods
+
+#### Data collection
+
+We compiled reef indicators using fish data collected using two different underwater visual census methods conducted as part of a long-term monitoring project by the Coral Reef Ecosystem Program of NOAA. Stationary point counts (SPC) provided observations of small-medium bodied fishes, and a towed-diver method (TOW) provided observations of large-bodied fishes. SPC methods can overestimates of the abundance of large roving fishes (Parrish & Friedlander??; Williams et al. 2015) and, as the TOW method is designed to quantify large-bodied fishes over large spatial scales, we decided to utilise information from both datasets.
+
+In the SPC method, two divers surveyed fish assemblages within adjacent cylinders with 7.5m^2 radius placed at 5 and 15m along a 30 m transect (Heenan et al. 2015). In the first five minutes of each survey, divers recorded all fishes present in the cyclinder, before then sizing (nearest cm) each observed fish group. In the TOW method, two divers surveyed reef assemblages while being towed at 1.5 kt for 50 minutes along a depth gradient < 30m (typically 15m) (Richards et al. 2011). Divers recorded the identity, number and size (nearest cm) of all fishes > 50 cm within a window 10x10 m in front of the tow-board (Richards et al. 2011). All SPC and TOW surveys were conducted on forereef habitat, and to avoid counting fishes that were recorded by both survey methods we excluded all fishes > 50 cm from the SPC dataset and any fishes < 50 cm from the TOW dataset.
+
+To avoid underestimating small and cryptic fishes that are difficult to detect we also removed juveniles from each species in the SPC dataset. For each species, we defined juveniles as 20% the size of the asymptotic length and excluded those individuals. All fish lengths were converted to mass using published length-weight relationships (Fishbase, Kulbicki et al. 2005), and each fish species was assigned a trophic level according to Fishbase (Froese & Pauly XX).
+
+#### Indicators
+
+Our indicator set was informed by a recent meta-analysis of coral reef fisheries indicators (Nash & Graham et al. 2016). We focused on univariate indicators which could be simply estimated from the fisheries-independent data that are typically collected by coral reef monitoring programmes, and inuitively linked to important fisheries properties such as fishable biomass and fish size. We decided to omit diversity and life history based indicators on the premise that..
+
+We also estimated three indicators of biomass distribution across trophic levels developed by Link et al. (2015). Across marine ecosystems, evidence for sigmoidal relationships between cumulative biomass and trophic level provides a useful framework for estimating indicators of........ 
+
+
+#### Indicator estimates
+
+We estimated indicators at the island-scale, where all SPC and TOW surveys conducted on a single island were aggregated together. In the Marianas region, we aggregated all surveys conducted at 3 neighbouring islands with low sample size (Alamagan, Guguan and Sarigan; hereafter AGS).
+
+
+
+#### Factor analysis
+
+We examined relationships between indicators using simple linear regression.
+
+We used factor analysis to determine redundancy among indicators, and identify a set of top indicators that captured MOST OF THE variability in community health/state.
+
+#### Environmental covariates
+
+The robustness of our top indicator set to environmental variability was tested by modelling each top indicator against environmental covariates that have been shown to influence reef fish assemblages. At broad spatial scales, variability in oceanic productivity and SST has been linked with natural variation in reef fish biomass (Williams et al. 2015), while more diverse reef ecosystems are associated with higher total biomass (REF). At smaller scales, biomass is also maximised at sites with intermediate (REF) or high (REF) hard coral cover and habitat complexity, and depleted in macroalgal dominated habitats (REF). Fishing pressure is the primary driver of reef ecosystem health (REF). Accurate catch and effort data were unavailable at many of the islands included in our analysis and, as such, we estimated human population density and proximity to markets as proxies for exploitation pressure (REF). Remote sensing datasets provided estimates of SST and productivity at each UVC site. SST was the minimum ....... Oceanic productivity (units) was the...... Instantaneous visual surveys of reef benthic condition were conducted following each CREP fish census, where each diver estimated the proportion of hard coral and macroalgal cover in their survey cylinder. Habitat complexity was quantified as the mean substrate height in each cylinder.
+
+Human population density estimates were extracted from SEDAC within a 20km radius of each site, and standardised by the forereef habitat area within a 75km radius at each site. Proximity to market (km) was the distance from each site to its nearest provincial capital, and estimated in ArcGIS.
+
+Species richness was......  
+
+
+### Tables
+
+1. Indicator set and definitions
+
+S1. CREP island set. Sites, lat, lon etc.
+
+
+### Figures
+
+1. Conceptual figure 
+2. Example of variation in reef fish communities
+3. PCA
+4. Environmental variability
+
+
+
+

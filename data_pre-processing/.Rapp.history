@@ -1,0 +1,228 @@
+Calc_Site_MeanLength<-function(x, min_size=1){  #
+	# function assumes that x is a data frame with at least the columns/elements listed in base_cols, plus the field_of_interest, in this case CommonFamily#
+	# function returns a data frame with Site_VisitID, Method, and mean site biomass(gm2) per each value of the field_of_interest (hard wired as CommonFamily for now!)#
+	#Base unit will be the entire survey#
+	base_cols=c("SITEVISITID", "METHOD") #
+	pool_cols<-c(base_cols, "SIZE_")                          #
+	#set count to zero for all sizes smaller than min size#
+#	x[x$SIZE_< (min_size),]$COUNT<-0#
+	#sum total number offishes per SIZE_#
+	y<-aggregate(x$COUNT,by=x[,pool_cols], sum)#
+	names(y)<-c(pool_cols, "COUNT")#
+	y$CS<-y$COUNT*y$SIZE_#
+	#now format this more or less as a crosstab, with field of interest as column variable#
+	y<-aggregate(y[,c("COUNT", "CS")],by=y[,base_cols], sum)#
+	y$MEAN_SIZE<-y$CS/y$COUNT#
+	return(y[,c(base_cols, "MEAN_SIZE")])#
+} # end Calc_Site_MeanLength
+load("/Users/adel.heenan/Documents/pRojects/exploratory_ideas/sigmoidal_cumulative_biomass_curves/fish-paste/data/MONREPdata_pooled_is_yr_RZ.rdata")
+ls()
+head(data_pooled_is_yr)
+names(data_pooled_is_yr)
+names(data_pooled_is_yr$Mean)
+load("/Users/adel.heenan/Documents/pRojects/exploratory_ideas/sigmoidal_cumulative_biomass_curves/fish-paste/data/islandbiophys_data_used_herbivore_analysis.RData")
+ls()
+head(ils)
+8.5*100
+runApp("~/Documents/shiny_examples/test_qc_3/")
+library(Shiny)
+library("Shiny")
+library("shiny")
+runApp("~/Documents/shiny_examples/test_qc_3/")
+load("data/QC_data_for_shiny.Rdata")
+runApp("~/Documents/shiny_examples/test_qc_3/")
+load("/Users/adel.heenan/Documents/data_requests/jeff_maynard_tom_oliver/fish-paste/data/site_all_fishes_abundancegm2.Rdata")
+ls()
+head(wsd)
+load("/Users/adel.heenan/Documents/data_requests/jeff_maynard_tom_oliver/fish-paste/data/site_all_fishes_abundancegm2.Rdata")
+setwd("~/Documents/GitHub/reef-indicators-master/data_pre-processing")
+rm(list=ls())#
+#
+library(gdata)             # needed for drop_levels()#
+library(reshape)           # reshape library inclues the cast() function used below#
+#
+#LOAD LIBRARY FUNCTIONS ... #
+source("lib/fish_team_functions.R")
+sectors<-read.csv("data/Sectors-Strata-Areas2015.csv", stringsAsFactors=FALSE)#
+# load site master to merge with sector names#
+site_master<-read.csv("data/SITE MASTER2015.csv")#
+site_master$SITE<-SiteNumLeadingZeros(site_master$SITE)#
+#
+## LOAD AND CLEAN fish data#
+load("data/ALL_REA_FISH_RAW_merged.Rdata")#
+x<-df#
+#
+# HOUSEKEEPING ------------------------------------------------------------#
+# clean up the data to only fields we currently use#
+DATA_COLS<-c("SITEVISITID", "METHOD", "DATE_", "OBS_YEAR",  "SITE", "REEF_ZONE",  "DEPTH_BIN",  "ISLAND", "LATITUDE",  "LONGITUDE",  "REGION" , "REGION_NAME", "SECTOR", "SPECIAL_AREA", "EXCLUDE_FLAG",#
+"REP",  "REPLICATEID", "DIVER", "HABITAT_CODE", "DEPTH", #
+"HARD_CORAL", "MA",  "TA",  "CCA",  "SAND",  "SOFT_CORAL", "CLAM" , "SPONGE", "CORALLIMORPH", "CYANO", "TUNICATE", "ZOANTHID" , "SPECIES", "COUNT", "SIZE_", "OBS_TYPE", #
+"COMPLEXITY", "SUBSTRATE_HEIGHT_0", "SUBSTRATE_HEIGHT_20", "SUBSTRATE_HEIGHT_50", "SUBSTRATE_HEIGHT_100", "SUBSTRATE_HEIGHT_150", "MAX_HEIGHT",#
+"SCIENTIFIC_NAME",  "TAXONNAME", "COMMONNAME", "GENUS", "FAMILY" , "COMMONFAMILYALL", "LMAX", "LW_A",  "LW_B",  "LENGTH_CONVERSION_FACTOR", "TROPHIC", "TROPHIC_MONREP")#
+head(x[,DATA_COLS])#
+x<-x[,DATA_COLS]#
+#
+#generate a simple "Strata" field, by concatenating Stratum and Depth fields#
+x$STRATA<-paste(x$REEF_ZONE, x$DEPTH_BIN, sep='')#
+#
+## Update SITE to have three numeric digits (eg OAH-01 becomes OAH-001)#
+x$SITE<-SiteNumLeadingZeros(x$SITE)
+x<-subset(x, x$EXCLUDE_FLAG==0, drop=TRUE)#
+x<-subset(x, x$METHOD %in% c("nSPC"), drop=TRUE) ## SPC only#
+x<-subset(x, x$OBS_YEAR >2008, drop=TRUE)
+table(x$METHOD)
+x<-subset(x, x$OBS_TYPE %in% c("U","I","N"))
+x<-subset(x, x$REEF_ZONE %in% c("Forereef"))
+x<-merge(x, site_master[,c("SITE", "SEC_NAME", "ANALYSIS_SEC", "ANALYSIS_YEAR", "ANALYSIS_STRATA")], by="SITE", all.x=TRUE)#
+#
+x[x$ISLAND=="Jarvis",]$ANALYSIS_SEC<-"Jarvis"#
+x[x$ISLAND=="Jarvis",]$ANALYSIS_YEAR<-x[x$ISLAND=="Jarvis",]$OBS_YEAR#
+x[x$ISLAND=="Jarvis",]$ANALYSIS_STRATA<-paste(x[x$ISLAND=="Jarvis",]$REEF_ZONE, x[x$ISLAND=="Jarvis",]$DEPTH_BIN, sep='')#
+#
+#CHECK THAT all ANALYSIS_SEC are present in the site_master file)#
+idw<-x[is.na(x$ANALYSIS_SEC)  & x$METHOD=="nSPC", c("REGION", "SITE","OBS_YEAR", "METHOD"),]#
+if(dim(idw)[1]>0) {cat("nSPC sites with MISSING ANALYSIS_SEC")}   # should be 0
+no_secs<-is.na(x$ANALYSIS_SEC)#
+tmp<-as.character(x$ANALYSIS_SEC)#
+tmp[no_secs]<-as.character(x[no_secs,]$ISLAND)#
+x$ANALYSIS_SEC<-tmp
+head(x)
+tail(x)
+which(x$REGION == "SAMOA" & x$OBS_YEAR == "2016")
+a<-which(x$OBS_YEAR == "2016")
+head(x[a,])
+(x[a,])
+rm(list=ls())#
+#
+library(gdata)             # needed for drop_levels()#
+library(reshape)           # reshape library inclues the cast() function used below#
+#
+#LOAD LIBRARY FUNCTIONS ... #
+source("lib/fish_team_functions.R")#
+#source("lib/Islandwide Mean&Variance Functions.R")#
+#
+# get strata and sectors data data - NB - the data in the raw file should be checked and updated#
+sectors<-read.csv("data/Sectors-Strata-Areas2015.csv", stringsAsFactors=FALSE)#
+# load site master to merge with sector names#
+site_master<-read.csv("data/SITE MASTER2015.csv")#
+site_master$SITE<-SiteNumLeadingZeros(site_master$SITE)#
+#
+## LOAD AND CLEAN fish data#
+load("data/ALL_REA_FISH_RAW_merged.Rdata")#
+x<-df#
+#
+# HOUSEKEEPING ------------------------------------------------------------#
+# clean up the data to only fields we currently use#
+DATA_COLS<-c("SITEVISITID", "METHOD", "DATE_", "OBS_YEAR",  "SITE", "REEF_ZONE",  "DEPTH_BIN",  "ISLAND", "LATITUDE",  "LONGITUDE",  "REGION" , "REGION_NAME", "SECTOR", "SPECIAL_AREA", "EXCLUDE_FLAG",#
+"REP",  "REPLICATEID", "DIVER", "HABITAT_CODE", "DEPTH", #
+"HARD_CORAL", "MA",  "TA",  "CCA",  "SAND",  "SOFT_CORAL", "CLAM" , "SPONGE", "CORALLIMORPH", "CYANO", "TUNICATE", "ZOANTHID" , "SPECIES", "COUNT", "SIZE_", "OBS_TYPE", #
+"COMPLEXITY", "SUBSTRATE_HEIGHT_0", "SUBSTRATE_HEIGHT_20", "SUBSTRATE_HEIGHT_50", "SUBSTRATE_HEIGHT_100", "SUBSTRATE_HEIGHT_150", "MAX_HEIGHT",#
+"SCIENTIFIC_NAME",  "TAXONNAME", "COMMONNAME", "GENUS", "FAMILY" , "COMMONFAMILYALL", "LMAX", "LW_A",  "LW_B",  "LENGTH_CONVERSION_FACTOR", "TROPHIC", "TROPHIC_MONREP")#
+head(x[,DATA_COLS])#
+x<-x[,DATA_COLS]#
+#
+#generate a simple "Strata" field, by concatenating Stratum and Depth fields#
+x$STRATA<-paste(x$REEF_ZONE, x$DEPTH_BIN, sep='')#
+#
+## Update SITE to have three numeric digits (eg OAH-01 becomes OAH-001)#
+x$SITE<-SiteNumLeadingZeros(x$SITE)#
+## filter data - remove sites with EXCLUDE_FLAG set to TRUE, SPC (instantaneous counts) and forereef only#
+x<-subset(x, x$EXCLUDE_FLAG==0, drop=TRUE)#
+x<-subset(x, x$METHOD %in% c("nSPC"), drop=TRUE) ## SPC only#
+x<-subset(x, x$OBS_YEAR >2008, drop=TRUE)#
+x<-subset(x, x$OBS_TYPE %in% c("U","I","N"))#
+x<-subset(x, x$REEF_ZONE %in% c("Forereef"))
+x<-merge(x, site_master[,c("SITE", "SEC_NAME", "ANALYSIS_SEC", "ANALYSIS_YEAR", "ANALYSIS_STRATA")], by="SITE", all.x=TRUE)#
+#
+x[x$ISLAND=="Jarvis",]$ANALYSIS_SEC<-"Jarvis"#
+x[x$ISLAND=="Jarvis",]$ANALYSIS_YEAR<-x[x$ISLAND=="Jarvis",]$OBS_YEAR#
+x[x$ISLAND=="Jarvis",]$ANALYSIS_STRATA<-paste(x[x$ISLAND=="Jarvis",]$REEF_ZONE, x[x$ISLAND=="Jarvis",]$DEPTH_BIN, sep='')#
+#
+#CHECK THAT all ANALYSIS_SEC are present in the site_master file)#
+idw<-x[is.na(x$ANALYSIS_SEC)  & x$METHOD=="nSPC", c("REGION", "SITE","OBS_YEAR", "METHOD"),]#
+if(dim(idw)[1]>0) {cat("nSPC sites with MISSING ANALYSIS_SEC")}   # should be 0#
+#
+#for ones that are missing, set it to ISLAND#
+no_secs<-is.na(x$ANALYSIS_SEC)#
+tmp<-as.character(x$ANALYSIS_SEC)#
+tmp[no_secs]<-as.character(x[no_secs,]$ISLAND)#
+x$ANALYSIS_SEC<-tmp
+names(x)
+head(x)
+test<-x
+test$cutoff<-test$LMAX*0.25
+head(test)
+a<-which(test$SIZE_ < test$cutoff)
+tmp<-test[-a,]
+head(tmp)
+dim(tmp)
+dim(test)
+a
+test[a[1,]]
+test[a[1],]
+test[a[1:10],]
+x$cutoff<-x$LMAX*0.25#
+ a<-which(x$SIZE_ < x$cutoff)#
+ x<-x[-a,]
+dim(x)
+rm(list=ls())#
+#
+library(gdata)             # needed for drop_levels()#
+library(reshape)           # reshape library inclues the cast() function used below#
+source("lib/fish_team_functions.r")#
+source("lib/Islandwide Mean&Variance Functions.R")#
+#################################################################### TOW WORKUP ############################################################################
+## FIRST FISH, BENTHIC IS BELOW ... BE AWARE THAT THESE ARE MUCH ROUGHER AND GLITCHY THAN THE FISH REA SCRIPTS .. FAR LESS WORK HAS BEEN DONE ON THESE THAN FOR REA#
+#################################################################### TOW WORKUP ############################################################################
+#
+load(file="data/ALL_TOW_FISH_RAW.rdata")#
+#
+# FISH TOW WORKINGS -------------------------------------------------------#
+wd<-df#
+#
+## drop any rows which have NOSC and MISS in the species field, these are tows which were aborted part way through#
+nosc<-which(wd$SPECIES == "NOSC")#
+wd<-wd[-nosc,]#
+miss<-which(wd$SPECIES == "MISS")#
+wd<-wd[-miss,]#
+#
+summary(wd)#
+unique(wd[wd$PROJECTEDLENGTH<50,]$ISLAND)#
+#
+#remove segments with distance less than 50m#
+###wd<-wd[wd$PROJECTEDLENGTH>50,]#
+#
+#wd<-subset(wd, wd$REGION=="SAMOA", drop=TRUE)#
+#wd<-subset(wd, wd$ISLAND != "South Bank", drop=TRUE)#
+#wd<-droplevels(wd)#
+wd[is.na(wd$COUNT),]$COUNT<-0#
+wd[is.na(wd$DEPTH),]$DEPTH<-0	#
+wd[is.na(wd$SIZE_),]$SIZE_<-0	#
+wd[is.na(wd$CENTROIDLAT),]$CENTROIDLAT<-0	#
+wd[is.na(wd$CENTROIDLON),]$CENTROIDLON<-0	#
+length(unique(wd$DIVEID))#
+#
+tmp.lev<-levels(wd$REEF_ZONE); head(tmp.lev)#
+levels(wd$REEF_ZONE)<-c(tmp.lev, "UNKNOWN")#
+tmp.lev<-levels(wd$FAMILY); head(tmp.lev)#
+levels(wd$FAMILY)<-c(tmp.lev, "UNKNOWN")#
+tmp.lev<-levels(wd$TAXONNAME); head(tmp.lev)#
+levels(wd$TAXONNAME)<-c(tmp.lev, "UNKNOWN")#
+tmp.lev<-levels(wd$TROPHIC_MONREP); head(tmp.lev)#
+levels(wd$TROPHIC_MONREP)<-c(tmp.lev, "UNKNOWN")#
+#
+wd[is.na(wd$REEF_ZONE),"REEF_ZONE"]<-"UNKNOWN"#
+wd[is.na(wd$TAXONNAME),"TAXONNAME"]<-"UNKNOWN"#
+wd[is.na(wd$FAMILY),"FAMILY"]<-"UNKNOWN"#
+wd[is.na(wd$TROPHIC_MONREP),"TROPHIC_MONREP"]<-"UNKNOWN"#
+#
+length(unique(wd$DIVEID))#
+#
+wd$biomass_g<-wd$LW_A*wd$COUNT*((wd$SIZE*wd$LENGTH_CONVERSION_FACTOR)^wd$LW_B)#
+#
+#Fix errors in the database#
+wd[wd$SIZE_ <50,]#
+wd[wd$SIZE_ < 50,]$COUNT<-0    # These are really presence records ... NOT a QUAN cont record#
+# set ISLAND of Lehua to Niihau (Lehua is a rock slightly offshore of Niihau)#
+wd[wd$ISLAND=="Lehua",]$ISLAND<-"Niihau"
+head(wd)
